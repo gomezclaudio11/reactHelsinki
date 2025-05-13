@@ -1,78 +1,84 @@
 import { useState, useEffect } from 'react'
-import Person from './components/Person'
-import axios from "axios"
+import Note from './components/Note'
+import notesService from './services/notes'
 
-  const App = () => {
-    const [persons, setPersons] = useState([])
-    const [newName, setNewName] = useState('')
-    const [newNumber, setNewNumber] = useState('')
-    const [filter, setFilter] = useState("")
-
-    useEffect(() => {
-      console.log("effect");
-      axios
-        .get("http://localhost:3001/persons")
-        .then(response => {
-          console.log("PROMISE FULFILLED");
-          setPersons(response.data)
-        })
-    }, [])
-    
-    const addPerson = (event) =>{
-      event.preventDefault()
-      const personObject = {
-        name: newName,
-        number: newNumber,
-        id: persons.length + 1
-      }
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState("")
+  const [showAll, setShowALL] = useState(true)
   
-      setPersons(persons.concat(personObject))
-      setNewName("")
-      setNewNumber("")
-    }
-  
-    const sameName = persons.some(
-      person => person.name.toLowerCase() === newName.toLowerCase()
-    )
-    if(sameName){
-      alert (`${newName} ya existe`)
-      return
-    }
+  useEffect(() => {
+    notesService
+      .getAll()
+      .then(initialNotes => {
+         setNotes(initialNotes)
+     })
+    },[])
 
-    const nameToShow = persons.filter(person => 
-      person.name.toLowerCase().includes(filter.toLowerCase()) )
-      return (
+  const addNote = (event) => {    
+    event.preventDefault()    
+    const noteObject = {
+     content: newNote,
+      important: Math.random() > 0.5,
+   } 
+   notesService
+    .create(noteObject)
+    .then (returnedNote => {
+      setNotes(notes.concat(returnedNote))
+      setNewNote("")
+    })
+  }
+
+  const handleNoteChange = (event) => {
+    console.log(event.target.value);
+    setNewNote(event.target.value)
+  }
+   
+  const notesToShow = showAll ? notes : notes.filter (note => note.important)
+  
+  const toggleImportanceOf = id => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+  
+    notesService
+      .update(id, changedNote)
+      .then (returnedNote => {
+        setNotes(notes.map(note => note.id !== id ? note : returnedNote))
+      })
+      .catch((error) => {
+        console.log(error)        
+        alert(`the note ${note.content} was alredy deleted from server`)
+        setNotes(notes.filter((n) => n.id !== id))
+      })
+  }
+  return (
         <div>
-          <h2>Phonebook</h2>
+        <h1>Notes</h1>
         <div>
-        filter shownn with <input value={filter} onChange={(e) => setFilter(e.target.value)} />
-        </div>
-        <ul>
-        {nameToShow.map(person => (
-          <Person key={person.id} person={person}/>
-          ))}
-        </ul>
-          <form onSubmit={addPerson}>
-          <div >
-          name: <input value={newName} onChange={(e) => setNewName(e.target.value)}/>
-          </div>
-          <div>
-          number: <input value={newNumber} onChange={(e) => setNewNumber(e.target.value)}/>
-          </div>
-          <div>
-          <button type="submit">add</button>
-          </div>
-          </form>
-          <h2>Numbers</h2>
+          <button onClick={()=> setShowALL(!showAll)}>
+            show {showAll ? "important" : "all"}
+          </button>  
+        </div>  
           <ul>
-          {
-            persons.map((person) => 
-              <Person Key={person.id} person={person} />
+            {notesToShow.map((note) =>
+            <Note 
+              key={note.id} 
+              note ={note}
+              toggleImportance={() => toggleImportanceOf(note.id)}  
+            />
             )
             }
           </ul>
-          </div>
-          )
-          }
+        <form onSubmit={addNote}>
+        <input value={newNote}
+              onChange={handleNoteChange}
+        />       
+        <button type="submit">save</button>      
+      </form>   
+      </div>
+      )
+      }
+      
+     
           
-  export default App 
+export default App 
