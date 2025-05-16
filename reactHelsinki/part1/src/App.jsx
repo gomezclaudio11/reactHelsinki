@@ -1,101 +1,62 @@
 import { useState, useEffect } from 'react'
-import Person from './components/Person'
-import personService from "./services/notes"
+import Country from './components/Country'
+import countriesService from "./services/countries"
 
   const App = () => {
-    const [persons, setPersons] = useState([])
-    const [newName, setNewName] = useState('')
-    const [newNumber, setNewNumber] = useState('')
-    const [filter, setFilter] = useState("")
+    const [countries, setCountries] = useState([])
+    const [filterr, setFilter] = useState("")
+    const [selectedCountry, setSelectedCountry] = useState(null)
 
     useEffect(() => {
-      personService
+      countriesService
         .getAll()
-        .then(initialPersons => {
-          setPersons(initialPersons)
+        .then(data => {
+          setCountries(data)
         })
     }, [])
     
-    const addPerson = (event) =>{
-      event.preventDefault()
-      const personObject = {
-        name: newName,
-        number: newNumber,
-        id: persons.length + 1
-      }
-      personService
-        .create(personObject)
-        .then (returnedPerson => {
-          setPersons(persons.concat(returnedPerson))
-          setNewName("")
-          setNewNumber("")
-        })
+    const handleShow = (country) => {
+      setSelectedCountry(country)
     }
 
-    const deletePerson = (id, name) => {
-    if(window.confirm(`Seguro que queres borrar a ${name}`)){
-      personService
-        .borrar(id)
-        .then(() => {
-          setPersons(persons.filter(person => person.id !== id))
-        })
-        .catch(error => {
-          console.log(error)          
-          alert (`la persona ${name} ya fue eliminada del servidor`)
-          setPersons(persons.filter(person => person.id !== id))
-        })
-    }
-    }
-  
-    const sameName = persons.some(
-      person => person.name.toLowerCase() === newName.toLowerCase()
-    )
-    if(sameName){
-      alert (`${newName} ya existe`)
-      return
-    }
-
-    const nameToShow = persons.filter(person => 
-      person.name.toLowerCase().includes(filter.toLowerCase()) )
+    const filtered = countries.filter(country => 
+      country.name.common.toLowerCase().includes(filterr.toLowerCase()) )
      
     return (
+      <div>
         <div>
-          <h2>Phonebook</h2>
-        <div>
-        filter shownn with <input value={filter} onChange={(e) => setFilter(e.target.value)} />
+          find the countries <input value={filterr} onChange={(e) => {
+            setFilter(e.target.value)
+            setSelectedCountry(null) //limpiar selección si se cambia el filtro
+          }}
+            />
         </div>
+
         <div>
-          <h3>Filter result</h3>
-        </div>
-        <ul>
-        {nameToShow.map(person => (
-          <Person key={person.id} person={person}/>
-          ))}
-        </ul>
-        <h3>Add contact</h3>
-          <form onSubmit={addPerson}>
-          <div >
-          name: <input value={newName} onChange={(e) => setNewName(e.target.value)}/>
-          </div>
-          <div>
-          number: <input value={newNumber} onChange={(e) => setNewNumber(e.target.value)}/>
-          </div>
-          <div>
-          <button type="submit">add</button>
-          </div>
-          </form>
-          <h2>Numbers</h2>
-          <ul>
           {
-            persons.map((person) => 
-              <Person 
-                key={person.id} 
-                person={person} 
-                handleDelete={() => deletePerson(person.id, person.name)} />
+            filtered.length > 10 && <p>too many match, specify another filter</p>
+          }
+          {
+            filtered.length === 1 && (
+              <Country country={filtered[0]}/>
+            )
+          }
+          {
+            filtered.length <= 10 && filtered.length >1 && (
+              filtered.map(country => (
+                <div key ={country.name.common}>
+                  {country.name.common}
+                  <button onClick={() => handleShow(country)}>show</button>
+                </div>
+              )) 
+            )}
+            {
+              selectedCountry && filtered.length > 1 &&(
+                <Country country={selectedCountry}/>
               )
             }
-          </ul>
-          </div>
+        </div>
+        </div>
           )
           }
           
