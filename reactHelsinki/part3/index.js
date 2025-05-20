@@ -66,8 +66,15 @@ app.post("/api/notes", (request, response) => {
 app.delete("/api/notes/:id", (request, response) => {
     const id = Number(request.params.id)
     const notes = notes.filter(note => note.id !== id)
-    response.status(204).end
+    response.status(204).end()
 })
+
+const unknowEndpoint = (request, response) => {
+    response.status(404).send({error: "unknow endpoint"})
+}
+
+app.use(unknowEndpoint)
+
 const PORT = 3001;
 app.listen(PORT);
 console.log(`server running on ${PORT}`);
