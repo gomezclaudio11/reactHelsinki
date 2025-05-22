@@ -1,63 +1,86 @@
 import { useState, useEffect } from 'react'
-import Country from './components/Country'
-import countriesService from "./services/countries"
+import Footer from './components/Footer'
+import Note from './components/Note'
+import Notification from './components/Notification'
+import noteService from './services/notes'
 
-  const App = () => {
-    const [countries, setCountries] = useState([])
-    const [filterr, setFilter] = useState("")
-    const [selectedCountry, setSelectedCountry] = useState(null)
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
+  const [showAll, setShowAll] = useState(true)
+  const [errorMessage, setErrorMessage] = useState(null)
 
-    useEffect(() => {
-      countriesService
-        .getAll()
-        .then(data => {
-          setCountries(data)
-        })
-    }, [])
-    
-    const handleShow = (country) => {
-      setSelectedCountry(country)
+  useEffect(() => {
+    noteService.getAll().then(initialNotes => {
+      setNotes(initialNotes)
+    })
+  }, [])
+
+  const addNote = event => {
+    event.preventDefault()
+    const noteObject = {
+      content: newNote,
+      important: Math.random() > 0.5
     }
 
-    const filtered = countries.filter(country => 
-      country.name.common.toLowerCase().includes(filterr.toLowerCase()) )
-     
-    return (
-      <div>
-        <div>
-          find the countries <input value={filterr} onChange={(e) => {
-            setFilter(e.target.value)
-            setSelectedCountry(null) //limpiar selección si se cambia el filtro
-          }}
-            />
-        </div>
+    noteService.create(noteObject).then(returnedNote => {
+      setNotes(notes.concat(returnedNote))
+      setNewNote('')
+    })
+  }
 
-        <div>
-          {
-            filtered.length > 10 && <p>too many match, specify another filter</p>
-          }
-          {
-            filtered.length === 1 && (
-              <Country country={filtered[0]}/>
-            )
-          }
-          {
-            filtered.length <= 10 && filtered.length >1 && (
-              filtered.map(country => (
-                <div key ={country.name.common}>
-                  {country.name.common}
-                  <button onClick={() => handleShow(country)}>show</button>
-                </div>
-              )) 
-            )}
-            {
-              selectedCountry && filtered.length > 1 &&(
-                <Country country={selectedCountry}/>
-              )
-            }
-        </div>
-        </div>
-          )
-          }
-          
-  export default App 
+  const toggleImportanceOf = id => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+
+    noteService
+      .update(id, changedNote)
+      .then(returnedNote => {
+        setNotes(notes.map(note => (note.id !== id ? note : returnedNote)))
+      })
+      .catch(error => {
+        console.log(error);        
+        setErrorMessage(
+          `Note '${note.content}' was already removed from server`
+        )
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+        setNotes(notes.filter(n => n.id !== id))
+      })
+  }
+
+  const handleNoteChange = event => {
+    setNewNote(event.target.value)
+  }
+
+  const notesToShow = showAll ? notes : notes.filter(note => note.important)
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <Notification message={errorMessage} />
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
+      <ul>
+        {notesToShow.map(note => (
+          <Note
+            key={note.id}
+            note={note}
+            toggleImportance={() => toggleImportanceOf(note.id)}
+          />
+        ))}
+      </ul>
+      <form onSubmit={addNote}>
+        <input value={newNote} onChange={handleNoteChange} />
+        <button type="submit">save</button>
+      </form>
+      <Footer />
+    </div>
+  )
+}
+
+export default App
