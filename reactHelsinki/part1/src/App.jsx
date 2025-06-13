@@ -17,7 +17,13 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [loginVisible, setLoginVisible] = useState(false)
 
-  const noteFormRef = useRef()
+  useEffect(() => {
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes)
+    })
+  }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedNoteappUser")
@@ -28,16 +34,12 @@ const App = () => {
     }
   }, [])
 
-  useEffect(() => {
-    noteService
-      .getAll()
-      .then(initialNotes => {
-        setNotes(initialNotes)
-    })
-  }, [])
+  const noteFormRef = useRef()
 
   const toggleImportanceOf = id => {
     const note = notes.find(n => n.id === id)
+    if (!note) return 
+
     const changedNote = { ...note, important: !note.important }
 
     noteService
@@ -46,14 +48,38 @@ const App = () => {
         setNotes(notes.map(note => (note.id !== id ? note : returnedNote)))
       })
       .catch(error => {
-        console.log(error);        
+        console.error('Error updating note:', error.response || error.message)
         setErrorMessage(
-          `Note '${note.content}' was already removed from server`
+          `Note cont was already removed from server`
         )
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
+        setNotes(notes.filter(n => n.id !== id))
       })
+  }
+
+  const addNote = (noteObject) => {
+    try {
+    noteFormRef.current.toggleVisibility()
+    noteService
+      .create(noteObject)
+      .then(returnedNote => {
+        if (!returnedNote || !returnedNote.content) {
+          throw new Error("Invalid note response")
+        }
+        setNotes(notes.concat(returnedNote))
+    })
+    .catch(error => {
+      console.error('Error creating note:', error.response?.data || error.message)
+      setErrorMessage("Error creating note. Check console for details.")
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    })
+    } catch (err) {
+      console.error('Unexpected error in addNote:', err)
+    }
   }
 
   const handleLogin = async (event) => {
@@ -79,24 +105,10 @@ const App = () => {
     console.log("logging in with", username, password)    
   }
 
-  const addNote = (noteObject) => {
-    noteFormRef.current.toggleVisibility()
-    noteService
-      .create(noteObject)
-      .then(returnedNote => {
-        setNotes(notes.concat(returnedNote))
-    })
-  }
-  
-  const notesToShow = showAll 
-    ? notes 
-    : notes.filter(note => note.important)
-
   const loginForm = () => {
     const hideWhenVisible = { display: loginVisible ? "none" : "" }
-    const showWhenVisible = { diplay: loginVisible ? "" : "none" }
-  
-  return (
+    const showWhenVisible = { display: loginVisible ? "" : "none" }
+   return (
     <div>
     <div style={hideWhenVisible}>
       <button onClick={() => setLoginVisible(true)}>log in</button>
@@ -115,6 +127,18 @@ const App = () => {
   )
   }
   
+  
+  const noteForm = () => (
+    <Togglable buttonLabel="new note" ref={noteFormRef} >
+      <NoteForm createNote={addNote} />
+    </Togglable>
+  )
+
+  const notesToShow = showAll
+    ? notes
+    : notes.filter(note => note.important)
+
+    
  return (
     <div>
       <h1>Notes</h1>
@@ -123,11 +147,7 @@ const App = () => {
       {!user && loginForm()}
       {user && <div>
         <p>{user.name} logged in </p>
-        <Togglable buttonLabel="new note">
-        <NoteForm
-          createNote={addNote}
-        />
-      </Togglable>
+        {noteForm()}
         </div>}
       <div>
         <button onClick={() => setShowAll(!showAll)}>
@@ -147,5 +167,14 @@ const App = () => {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
 
 export default App

@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseUrl =  "https://reacthelsinki-2.onrender.com/api/notes"
+const baseUrl = "https://reacthelsinki-2.onrender.com/api/notes" //"/api/notes"
 let token = null
 
 const setToken = newToken => {
@@ -20,7 +20,10 @@ const create = async newObject => {
 }
 
 const update = (id, newObject) => {
-  const request = axios.put(`${baseUrl}/${id}`, newObject)
+  const config = {
+    headers: { Authorization: token }
+  }
+  const request = axios.put(`${baseUrl}/${id}`, newObject, config)
   return request.then((response) => response.data)
 }
 
