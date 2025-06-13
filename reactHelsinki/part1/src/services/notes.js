@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseUrl = "https://reacthelsinki-2.onrender.com/api/notes" //"/api/notes"
+const baseUrl = "/api/notes" //"https://reacthelsinki-2.onrender.com/api/notes"
 let token = null
 
 const setToken = newToken => {
@@ -15,7 +15,8 @@ const create = async newObject => {
   const config = {
     headers: { Authorization: token }
   }
-  const response = axios.post(baseUrl, newObject, config)
+  console.log('Token usado en create:', token)
+  const response = await axios.post(baseUrl, newObject, config)
   return response.data
 }
 
