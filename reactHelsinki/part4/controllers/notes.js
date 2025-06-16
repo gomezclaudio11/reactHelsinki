@@ -1,7 +1,6 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
 const User = require("../models/user")
-const jwt = require("jsonwebtoken")
 const { userExtractor } = require('../utils/middleware')
 
 notesRouter.get('/', async (request, response) => {
