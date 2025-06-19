@@ -39,7 +39,9 @@ const Notes = () => {
     </ul>
   )
 }
-//useSelector te da acceso a las notas guardadas en el estado de Redux.
+//useSelector te da acceso a las notas guardadas en el 
+// estado de Redux.
 
-//useDispatch te permite modificar ese estado cuando hacés click.
+//useDispatch te permite modificar ese estado cuando 
+// hacés click.
 export default Notes
