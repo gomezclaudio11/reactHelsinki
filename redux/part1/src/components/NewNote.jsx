@@ -1,10 +1,10 @@
 import { useDispatch } from 'react-redux'
 import { createNote } from '../reducers/noteReducer'
-import noteService from "../services/notes"
 
 const NewNote = () => {
   const dispatch = useDispatch()
-
+//permite enviar acciones al store de Redux. y 
+// actualiza el estado
   const addNote = async (event) => {
     event.preventDefault()
     const content = event.target.note.value

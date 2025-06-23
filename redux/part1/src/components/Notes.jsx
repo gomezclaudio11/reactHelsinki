@@ -19,11 +19,11 @@ const Notes = () => {
   // estado global.
   const notes = useSelector(state =>{
     if ( state.filter === "ALL") {
-      return state.notess
+      return state.notes
     }
     return state.filter === "IMPORTANT"
-      ? state.notess.filter (note => note.important)
-      : state.notess.filter (note => !note.important)
+      ? state.notes.filter (note => note.important)
+      : state.notes.filter (note => !note.important)
   } )
   return(
     <ul>

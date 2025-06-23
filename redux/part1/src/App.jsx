@@ -6,8 +6,8 @@ import { useDispatch } from 'react-redux'
 import { initializeNotes } from './reducers/noteReducer'
 
 const App = () => {
-  const dispatch = useDispatch()
-  useEffect(() => {
+  const dispatch = useDispatch()//te permite enviar acciones al store de Redux.
+  useEffect(() => {//Este hook se ejecuta una sola vez al montar el componente
     dispatch(initializeNotes())  
   }, [])
   return (
