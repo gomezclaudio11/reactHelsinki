@@ -14,7 +14,7 @@ const App = () => {
   })
 
   const addNote = async (event) => {
-    event.preventDefault()
+    event.preventDefault() //Previene el comportamiento por defecto del form.
     const content = event.target.note.value //extrae texto de la nota
     event.target.note.value = '' // limpia el input
     newNoteMutation.mutate({ content, important: true}) //llama al mutate para hacer el POST
