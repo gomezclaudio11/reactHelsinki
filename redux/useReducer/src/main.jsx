@@ -8,3 +8,10 @@ createRoot(document.getElementById('root')).render(
     <App />
   </CounterContextProvider>,
 )
+/**
+ Todo lo que esté dentro de <App /> podrá acceder al 
+ contexto (ej. contador, acciones para incrementarlo, etc.)
+
+usando el Context API de React se puede compartir datos 
+entre componentes sin pasar props manualmente.
+ */

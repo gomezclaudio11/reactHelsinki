@@ -8,5 +8,10 @@ const Button = ({ type, label }) => {
     </button>
   )
 }
+/**
+ Cada vez que llamás a useCounterDispatch(...), se ejecuta 
+ counterReducer, que decide qué nuevo valor debe tener
+ el contador.
+ */
 
 export default Button
