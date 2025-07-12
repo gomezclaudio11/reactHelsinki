@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, Navigate }  from 'react-router-dom'
 import { useParams, useNavigate } from "react-router-dom"
+import { useField } from './hooks'
+
 const Menu = () => {
   const padding = {
     paddingRight: 5
@@ -61,44 +63,50 @@ const Footer = () => (
   </div>
 )
 
+
 const CreateNew = (props) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+  //cada uno es un campo controlado con su propi estado y logica
+  const content = useField("text")
+  const author = useField("text")
+  const url = useField("text")
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+    const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.inputProps.value,
+      author: author.inputProps.value,
       votes: 0
     })
     navigate("/anecdotes")
   }
-
-  return (
+  const handleReset = () => {
+     // Limpiar los campos con reset()
+    content.reset()
+    author.reset()
+    url.reset()
+  }
+    return (
     <div>
       <h2>create a new anecdote</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          content: 
+          <input {...content.inputProps} />
         </div>
         <div>
-          author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          author: 
+          <input {...author.inputProps} />
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input {...url.inputProps} />
         </div>
         <button >create</button>
+        <button type='button' onClick={handleReset}>reset</button>
       </form>
     </div>
   )
-
 }
 
 const App = () => {
@@ -125,7 +133,7 @@ const App = () => {
     anecdote.id = Math.round(Math.random() * 10000)
     setAnecdotes(anecdotes.concat(anecdote))
     // mostrar notificación
-  setNotification(`A new anecdote "${anecdote.content}" created!`)
+  setNotification(`A new anecdote "${anecdote.content }" created!`)
   
   // limpiar notificación después de 5 segundos
   setTimeout(() => {
