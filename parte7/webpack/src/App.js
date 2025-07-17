@@ -43,7 +43,7 @@ export default App
  o varios archivos finales optimizados, generalmente para 
  producción.
  Tenés un proyecto con:
-index.js - App.js - style.css - imágenes fuentes dependencias (React, Axios, etc.)
+index.js - App.js - style.css - imágenes - fuentes dependencias (React, Axios, etc.)
 
 Webpack:
     Lee tu archivo de entrada (por ejemplo index.js).
