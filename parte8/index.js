@@ -1,9 +1,13 @@
-const { ApolloServer } = require('@apollo/server')
-const { startStandaloneServer } = require('@apollo/server/standalone')
-const gql = require('graphql-tag')
-const { v1: uuid } = require('uuid')
-const { GraphQLError } = require ("graphql")
+//trabajando con Apollo Server 4, creando una API GraphQL para 
+// gestionar personas.
 
+const { ApolloServer } = require('@apollo/server') //servidor principal de GraphQl
+const { startStandaloneServer } = require('@apollo/server/standalone') // metodo para levantar el servidor de forma simple sin Express
+const gql = require('graphql-tag') //permite definir esquemas de graphQL usando temple strings
+const { v1: uuid } = require('uuid') //genera ID unicos
+const { GraphQLError } = require ("graphql") //permite lanzar errores personalizados
+
+//lista de memoria de personas
 let persons = [
   {
     name: "Arto Hellas",
@@ -27,6 +31,7 @@ let persons = [
   },
 ]
 
+//Esquemas, define como luce tu API GraphQL
 const typeDefs = gql`
   type Address {  
     street: String!  
@@ -64,10 +69,10 @@ const typeDefs = gql`
     ): Person
 }
 `
-
+// resolver especifica como responder a cada campo o accion
 const resolvers = {
   Query: {
-    personCount: () => persons.length,
+    personCount: () => persons.length, 
     allPersons: (root, args) => {
         if(!args.phone) {
             return persons
@@ -79,6 +84,8 @@ const resolvers = {
     findPerson: (root, args) =>
       persons.find(p => p.name === args.name)
   },
+  //Cuando GraphQL pide el campo address, lo genera a partir
+  //de los campos planos street y city.
   Person: {
   address: (root) => {
     return {
@@ -88,7 +95,7 @@ const resolvers = {
     }
   },
   Mutation: {
-    addPerson: (root, args) => {
+    addPerson: (root, args) => { // verifica que el name sea unico
       if (persons.find(p => p.name === args.name)) {        
         throw new GraphQLError('Name must be unique', {          
             extensions: {            
@@ -97,17 +104,19 @@ const resolvers = {
             }        
         })      
     }
+    //crea una persona y lo agrega al array
       const person = { ...args, id: uuid() }
       persons = persons.concat(person)
       return person
     },
 
+    //busca una persona x nombre
     editNumber: (root, args) => {
         const person = persons.find(p => p.name === args.name)
         if(!person) {
             return null
         }
-
+    //si la encuentra crea una copia del nuevo telefono y actualiza el array    
         const updatedPerson = { ...person, phone: args.phone }
         persons = persons.map(p => p.name === args.name ? updatedPerson : p)
         return updatedPerson
