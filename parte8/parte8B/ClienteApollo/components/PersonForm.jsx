@@ -11,12 +11,17 @@ const PersonForm = ({ setError }) => {
 
 
   const [ createPerson ] = useMutation(CREATE_PERSON, {// es la mutación que agrega una persona al servido
-    refetchQueries: [ {query: ALL_PERSONS} ],
-// después de crear la persona, vuelve a ejecutar ALL_PERSONS para actualizar la lista sin tener que refrescar la página.
     onError: (error) => {
         const messages = error.graphQLErrors.map(e => e.message).join("\n")
         setError(messages)
-    }
+    },
+        update: (cache, response) => {      
+          cache.updateQuery({ query: ALL_PERSONS }, ({ allPersons }) => {        
+            return {          
+              allPersons: allPersons.concat(response.data.addPerson),        
+            }      
+          })    
+        },
   })
 
 //Función de envío del formulario
@@ -25,7 +30,12 @@ const PersonForm = ({ setError }) => {
 
 //ejecuta la mutación enviando los datos como variables a GraphQL.
 //Luego resetea los campos del formulario a cadenas vacías.
-    createPerson({  variables: { name, phone, street, city } })
+    createPerson({  
+      variables: { 
+        name, street, city,
+        //phone en undefined si el usuario no ha dado un valor.
+        phone: phone.length > 0 ? phone : undefined
+      } })
 
     setName('')
     setPhone('')

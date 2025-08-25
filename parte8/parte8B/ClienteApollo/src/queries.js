@@ -1,5 +1,17 @@
 import { gql  } from '@apollo/client'
 
+const PERSON_DETAILS = gql`
+  fragment PersonDetails on Person {
+    id
+    name
+    phone 
+    address {
+      street 
+      city
+    }
+  }
+`
+
 export const ALL_PERSONS = gql`
   query {
       allPersons  {
@@ -53,4 +65,21 @@ export const EDIT_NUMBER = gql `
             id
         }
     }
+`
+export const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password)  {
+      value
+    }
+  }
+`
+
+export const PERSON_ADDED = gql`
+  subscription {
+    personAdded {
+      ...PersonDetails
+    }
+  }
+  
+${PERSON_DETAILS}
 `
