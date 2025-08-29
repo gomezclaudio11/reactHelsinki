@@ -3,7 +3,7 @@ import { useState } from "react"
 import { EDIT_BIRTHYEAR } from "../queries"
 import { useEffect } from "react"
 
-const SetBirthYear = ({ setError }) => {
+const SetBirthYear = ({ setError, show }) => {
     const [name, setName] = useState("")
     const [born, setBorn] = useState("")
 
@@ -28,6 +28,10 @@ const SetBirthYear = ({ setError }) => {
     }
   }, [result.data])
 
+  if(!show){
+    return null
+  }
+  
   return(
      <div>
       <h2>Set Birth Year</h2>

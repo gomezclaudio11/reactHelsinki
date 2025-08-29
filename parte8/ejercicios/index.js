@@ -1,7 +1,6 @@
 const { ApolloServer } = require ('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
 const gql = require("graphql-tag")
-const { v1: uuid } = require('uuid') 
 const { GraphQLError } = require ("graphql")
 const mongoose = require("mongoose")
 mongoose.set("strictQuery", false)
@@ -163,8 +162,8 @@ type Book {
 
 const resolvers = {
   Query: {
-    authorCount: () => async () => Author.collection.countDocuments(),
-    bookCount: () => async () => Book.collection.countDocuments(),
+    authorCount: async () => Author.collection.countDocuments(),
+    bookCount: async () => Book.collection.countDocuments(),
     allBooks: async (root, args) =>{
        let filter = {}
 
@@ -184,10 +183,14 @@ const resolvers = {
     }
   },
   Author: {
-    bookCount: () => async () => Book.collection.countDocuments()
+    bookCount: async (root) => {
+      if(!root) return 0
+      return await Book.countDocuments({ author: root._id })
+    }
   },
    Book: {
     author: async (root) => {
+      if(!root || !root.author) return null;
       return await Author.findById(root.author)  // root.author = ObjectId
     }
   },
@@ -226,6 +229,7 @@ const resolvers = {
           }
         })
       }
+      await book.populate("author")
       return book
   },
 
@@ -292,6 +296,7 @@ const server = new ApolloServer({
 
 startStandaloneServer(server, {
   listen: { port: 4000 },
+  path: "/graphql",
     context: async ({ req, res }) => {
       const auth = req ? req.headers.authorization : null
       if (auth && auth.startsWith('Bearer ')) {
@@ -304,5 +309,5 @@ startStandaloneServer(server, {
       }
     },
 }).then(({ url }) => {
-  console.log(`Server ready at ${url}`)
+  console.log(`Server ready at dddd ${url}`)
 })

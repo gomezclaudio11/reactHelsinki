@@ -120,7 +120,7 @@ const typeDefs = gql`
 // objeto para su uso.
 const resolvers = {
   Query: {
-    personCount: () => async () => Person.collection.countDocuments(), 
+    personCount: async () => Person.collection.countDocuments(), 
     allPersons:  async (root, args) => {
       // filters missing
       if (!args.phone) {

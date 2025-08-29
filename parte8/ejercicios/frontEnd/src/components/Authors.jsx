@@ -1,5 +1,8 @@
 
-const Authors = ({ authors }) => {
+const Authors = ({ authors, show }) => {
+  if(!show){
+    return null
+  }
 
   return (
     <div>
@@ -11,12 +14,13 @@ const Authors = ({ authors }) => {
             <th>born</th>
             <th>books</th>
           </tr>
-          {authors.map((a) => (
-            <tr key={a.name}>
+          {authors.map(a => (
+             <tr key={a.id} >
               <td>{a.name}</td>
               <td>{a.born}</td>
               <td>{a.bookCount}</td>
             </tr>
+            
           ))}
         </tbody>
       </table>
