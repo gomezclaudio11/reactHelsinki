@@ -9,6 +9,6 @@
     "skipLibCheck": true,               
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["*.ts"]
+  "include": ["*.ts", "parte9a/index.ts", "parte9a/multiplier.ts"]
 }
 
